@@ -63,3 +63,4 @@ This workshop is provided under the MIT License for educational purposes.
 ## My Workshop Notes
 
 Preparing for BSides Munich DevSecOps workshop!
+One minor change
