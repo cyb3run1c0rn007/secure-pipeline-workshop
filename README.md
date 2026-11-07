@@ -94,4 +94,16 @@ This workshop is provided under the MIT License for educational purposes.
 - IaC to identify misconfigurations BEFORE deployment
 - treat IaC as any software
 
+## 5 Container Scan
+- issues; Vulnerable dependencies, hardcoded secrets, excessive priviledges (root, network, filesystem)
+- common to deploy
+- access to underlying infra / secrets
+
+## 6 Runtime INfrastructure Scan
+- issues: access control, encryption, network security, compliance & governance, drift
+
+- it´s the final source of truth
+- manual changes exist
+- 
+
 
