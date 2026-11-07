@@ -77,11 +77,15 @@ jobs:
 
 
 
+ 
       - name: Set scan result
         id: scan-result
         if: always()
         env:
           SCAN_OUTCOME: ${{ steps.scan-tool.outcome }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.number }}
         run: |
           if [ "$SCAN_OUTCOME" == "success" ]; then
             echo "result=success" >> "$GITHUB_OUTPUT"
@@ -89,11 +93,13 @@ jobs:
           else
             echo "result=failure" >> "$GITHUB_OUTPUT"
             echo "❌ IAC scan failed - security issues detected"
-            if [ "${{ github.event_name }}" == "pull_request" ]; then
-              echo "🔍 View findings: https://github.com/${{ github.repository }}/security/code-scanning?query=pr%3A${{ github.event.number }}+is%3Aopen"
+
+            if [ "$EVENT_NAME" == "pull_request" ]; then
+              echo "🔍 View findings: https://github.com/${REPOSITORY}/security/code-scanning?query=pr%3A${PR_NUMBER}+is%3Aopen"
             else
-              echo "🔍 View findings: https://github.com/${{ github.repository }}/security/code-scanning"
+              echo "🔍 View findings: https://github.com/${REPOSITORY}/security/code-scanning"
             fi
+
             exit 1
           fi
 
