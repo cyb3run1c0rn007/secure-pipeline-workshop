@@ -75,11 +75,15 @@ jobs:
           sarif_file: trivy-iac.sarif
           category: trivy-iac
 
+
+
       - name: Set scan result
         id: scan-result
         if: always()
+        env:
+          SCAN_OUTCOME: ${{ steps.scan-tool.outcome }}
         run: |
-          if [ "${{ steps.scan-tool.outcome }}" == "success" ]; then
+          if [ "$SCAN_OUTCOME" == "success" ]; then
             echo "result=success" >> "$GITHUB_OUTPUT"
             echo "✅ IAC scan passed - no security issues found"
           else
