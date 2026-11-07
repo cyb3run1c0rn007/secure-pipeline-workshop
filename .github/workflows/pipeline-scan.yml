@@ -7,7 +7,6 @@ on:
         description: "Pipeline scan result"
         value: ${{ jobs.pipeline-scan.outputs.result }}
 
-jobs:
 # =============================================================================
 # CLAWS PIPELINE SCAN JOB
 # =============================================================================
