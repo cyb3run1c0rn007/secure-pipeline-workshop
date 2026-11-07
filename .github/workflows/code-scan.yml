@@ -104,7 +104,6 @@ jobs:
 # 4. The scan will fail if vulnerabilities are found
 # =============================================================================
 
-jobs:
   code-scan:
     name: Code Scan with Dependency Check
     runs-on: ubuntu-latest
