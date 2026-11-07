@@ -98,10 +98,13 @@ jobs:
           path: output/*.html
           retention-days: 3
 
+      
       - name: Summarize findings
         if: always()
+        env:
+          PROWLER_OUTCOME: ${{ steps.prowler.outcome }}
         run: |
-          if [ "${{ steps.prowler.outcome }}" == "success" ]; then
+          if [ "$PROWLER_OUTCOME" == "success" ]; then
             echo "✅ No security alerts"
           else
             echo "❌ Prowler detected runtime infrastructure security issues."
@@ -111,8 +114,10 @@ jobs:
       - name: Set scan result
         id: scan-result
         if: always()
+        env:
+          PROWLER_OUTCOME: ${{ steps.prowler.outcome }}
         run: |
-          if [ "${{ steps.prowler.outcome }}" == "success" ]; then
+          if [ "$PROWLER_OUTCOME" == "success" ]; then
             echo "result=success" >> "$GITHUB_OUTPUT"
             echo "✅ Pipeline scan passed"
           else
