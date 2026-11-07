@@ -67,3 +67,7 @@ This workshop is provided under the MIT License for educational purposes.
 - pre-commit -> detect secrets BEFORE commit
 - why pipeline security: no harcoded secrets, elevated access, untrusted actions
 
+## 1 Secrets Scan:
+- Claude co-authored leaks secrets twice the human baseline
+- Secrets Spawl -> Remediation of detected secrets is a big problem (from 2022 detection, more than 60% still there multiple years later)
+- other types of sensitive data: webhooks (internal domains, trigger actions), Account IDs (easier enumeration), internal documents, PII -> AWSeye
