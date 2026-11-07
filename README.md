@@ -71,3 +71,19 @@ This workshop is provided under the MIT License for educational purposes.
 - Claude co-authored leaks secrets twice the human baseline
 - Secrets Spawl -> Remediation of detected secrets is a big problem (from 2022 detection, more than 60% still there multiple years later)
 - other types of sensitive data: webhooks (internal domains, trigger actions), Account IDs (easier enumeration), internal documents, PII -> AWSeye
+
+## 2 SAST Code Scan:
+- issue: lots of findings -> NOISE
+- hint: you can use AI to check if it can be easily exploited -> if yes, raise criticality; if not -> review
+- vulnerability detection in code
+- faster than DAST
+
+## 3 SCA Code Scan:
+- issue: lots of findings -> NOISE
+- hint: you can use AI to check if it can be easily exploited -> if yes, raise criticality; if not -> review
+- Software Code Analysis
+- identify outdated & vulnerable components
+- helps to build Software Bill of Material (SBOM)
+- Mitigate (detected) Supply Chain attacks
+- >License issues, vulnerabilities in dependencies, execute untrusted code
+
