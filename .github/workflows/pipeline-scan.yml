@@ -35,7 +35,7 @@ jobs:
           persist-credentials: false
 
       - name: Set Up Ruby
-        uses: ruby/setup-ruby@master
+        uses: ruby/setup-ruby@b3aaceaef7e0ee231b499e7b5f49c03fc1d32199
         with:
           ruby-version: '3.3'
 
@@ -106,3 +106,6 @@ jobs:
             echo "❌ Pipeline scan failed - security issues detected in workflows"
             exit 1
           fi
+
+        
+          
