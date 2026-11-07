@@ -87,3 +87,11 @@ This workshop is provided under the MIT License for educational purposes.
 - Mitigate (detected) Supply Chain attacks
 - >License issues, vulnerabilities in dependencies, execute untrusted code
 
+## 4 Infra as Code Scan:
+- issues: Access Control, Encryption, Network Security, Compliance & Governance (LOGGING!!! & Audit Trails)
+- hints & recommendation: encrypted remote backend, state locking, mark sensitive data, pin provider versions, vet third-party modules
+- Reommend to use terraform plan and equivalents for accurate results
+- IaC to identify misconfigurations BEFORE deployment
+- treat IaC as any software
+
+
