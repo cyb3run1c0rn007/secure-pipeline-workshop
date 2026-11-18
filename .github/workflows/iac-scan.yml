@@ -1,3 +1,4 @@
+
 name: Infrastructure Security Scan
 
 on:
@@ -7,26 +8,13 @@ on:
         description: "IaC scan result"
         value: ${{ jobs.iac-scan.outputs.result }}
 
-# =============================================================================
-# TRIVY IAC SCAN JOB
-# =============================================================================
-#
-# Trivy is a vulnerability scanner for container images and filesystems
-# Repository: https://github.com/aquasecurity/trivy
-#
-# TO USE THIS JOB:
-# 1. Copy this entire job definition into .github/workflows/iac-scan.yml
-# 2. Replace the current jobs: definition with this one
-# 3. The job will automatically scan all files in infra/
-# 4. The scan will fail if any security issues are found
-# =============================================================================
-
 jobs:
   iac-scan:
     name: IAC Scan with Trivy
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.scan-result.outputs.result }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -43,15 +31,33 @@ jobs:
           hide-progress: true
           format: 'sarif'
           limit-severities-for-sarif: true
-          output: 'trivy-results.sarif'       
+          output: 'trivy-results.sarif'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
         continue-on-error: true
 
+      - name: Generate Trivy JSON report
+        if: always()
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: 'config'
+          scan-ref: infra/
+          hide-progress: true
+          format: 'json'
+          output: 'trivy-results.json'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload JSON report as artifact
+        if: always() && hashFiles('trivy-results.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-json-report
+          path: trivy-results.json
+          retention-days: 7
 
       - name: Normalize SARIF paths to repo root
         if: always() && hashFiles('trivy-results.sarif') != ''
-        # Trivy emits paths relative to scan-ref; rewrite to repo-root so GHAS can map findings to the PR diff.
         run: |
           jq '(.runs[].results[].locations[].physicalLocation.artifactLocation.uri) |= "infra/" + .' \
             trivy-results.sarif > trivy-iac.sarif
@@ -61,9 +67,9 @@ jobs:
         run: |
           COUNT=$(jq '[.runs[].results[]] | length' trivy-iac.sarif)
           if [ "${COUNT:-0}" -eq 0 ]; then
-            echo "✅ No security alerts"
+            echo "No security alerts"
           else
-            echo "❌ Found $COUNT Trivy IaC finding(s):"
+            echo "Found $COUNT Trivy IaC finding(s):"
             jq -r '.runs[].results[] |
               "  - \(.ruleId) | \(.message.text)\n      \(.locations[0].physicalLocation.artifactLocation.uri):\(.locations[0].physicalLocation.region.startLine // 1)"' \
               trivy-iac.sarif
@@ -76,9 +82,6 @@ jobs:
           sarif_file: trivy-iac.sarif
           category: trivy-iac
 
-
-
- 
       - name: Set scan result
         id: scan-result
         if: always()
@@ -90,17 +93,14 @@ jobs:
         run: |
           if [ "$SCAN_OUTCOME" == "success" ]; then
             echo "result=success" >> "$GITHUB_OUTPUT"
-            echo "✅ IAC scan passed - no security issues found"
+            echo "IAC scan passed"
           else
             echo "result=failure" >> "$GITHUB_OUTPUT"
-            echo "❌ IAC scan failed - security issues detected"
-
+            echo "IAC scan failed"
             if [ "$EVENT_NAME" == "pull_request" ]; then
-              echo "🔍 View findings: https://github.com/${REPOSITORY}/security/code-scanning?query=pr%3A${PR_NUMBER}+is%3Aopen"
+              echo "View findings: https://github.com/${REPOSITORY}/security/code-scanning?query=pr%3A${PR_NUMBER}+is%3Aopen"
             else
-              echo "🔍 View findings: https://github.com/${REPOSITORY}/security/code-scanning"
+              echo "View findings: https://github.com/${REPOSITORY}/security/code-scanning"
             fi
-
             exit 1
           fi
-
