@@ -67,3 +67,43 @@ This workshop is provided under the MIT License for educational purposes.
 - pre-commit -> detect secrets BEFORE commit
 - why pipeline security: no harcoded secrets, elevated access, untrusted actions
 
+## 1 Secrets Scan:
+- Claude co-authored leaks secrets twice the human baseline
+- Secrets Spawl -> Remediation of detected secrets is a big problem (from 2022 detection, more than 60% still there multiple years later)
+- other types of sensitive data: webhooks (internal domains, trigger actions), Account IDs (easier enumeration), internal documents, PII -> AWSeye
+
+## 2 SAST Code Scan:
+- issue: lots of findings -> NOISE
+- hint: you can use AI to check if it can be easily exploited -> if yes, raise criticality; if not -> review
+- vulnerability detection in code
+- faster than DAST
+
+## 3 SCA Code Scan:
+- issue: lots of findings -> NOISE
+- hint: you can use AI to check if it can be easily exploited -> if yes, raise criticality; if not -> review
+- Software Code Analysis
+- identify outdated & vulnerable components
+- helps to build Software Bill of Material (SBOM)
+- Mitigate (detected) Supply Chain attacks
+- >License issues, vulnerabilities in dependencies, execute untrusted code
+
+## 4 Infra as Code Scan:
+- issues: Access Control, Encryption, Network Security, Compliance & Governance (LOGGING!!! & Audit Trails)
+- hints & recommendation: encrypted remote backend, state locking, mark sensitive data, pin provider versions, vet third-party modules
+- Reommend to use terraform plan and equivalents for accurate results
+- IaC to identify misconfigurations BEFORE deployment
+- treat IaC as any software
+
+## 5 Container Scan
+- issues; Vulnerable dependencies, hardcoded secrets, excessive priviledges (root, network, filesystem)
+- common to deploy
+- access to underlying infra / secrets
+
+## 6 Runtime INfrastructure Scan
+- issues: access control, encryption, network security, compliance & governance, drift
+
+- it´s the final source of truth
+- manual changes exist
+- 
+
+

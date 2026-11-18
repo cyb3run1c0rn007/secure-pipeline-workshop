@@ -1,3 +1,4 @@
+
 name: Infrastructure Security Scan
 
 on:
@@ -7,13 +8,13 @@ on:
         description: "IaC scan result"
         value: ${{ jobs.iac-scan.outputs.result }}
 
-
 jobs:
   iac-scan:
     name: IAC Scan with Trivy
     runs-on: ubuntu-latest
     outputs:
       result: ${{ steps.scan-result.outputs.result }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -33,7 +34,7 @@ jobs:
           output: 'trivy-results.sarif'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
-        continue-on-error: false
+        continue-on-error: true
 
       - name: Generate Trivy JSON report
         if: always()
@@ -55,10 +56,8 @@ jobs:
           path: trivy-results.json
           retention-days: 7
 
-
       - name: Normalize SARIF paths to repo root
         if: always() && hashFiles('trivy-results.sarif') != ''
-        # Trivy emits paths relative to scan-ref; rewrite to repo-root so GHAS can map findings to the PR diff.
         run: |
           jq '(.runs[].results[].locations[].physicalLocation.artifactLocation.uri) |= "infra/" + .' \
             trivy-results.sarif > trivy-iac.sarif
@@ -68,9 +67,9 @@ jobs:
         run: |
           COUNT=$(jq '[.runs[].results[]] | length' trivy-iac.sarif)
           if [ "${COUNT:-0}" -eq 0 ]; then
-            echo "✅ No security alerts"
+            echo "No security alerts"
           else
-            echo "❌ Found $COUNT Trivy IaC finding(s):"
+            echo "Found $COUNT Trivy IaC finding(s):"
             jq -r '.runs[].results[] |
               "  - \(.ruleId) | \(.message.text)\n      \(.locations[0].physicalLocation.artifactLocation.uri):\(.locations[0].physicalLocation.region.startLine // 1)"' \
               trivy-iac.sarif
@@ -86,17 +85,22 @@ jobs:
       - name: Set scan result
         id: scan-result
         if: always()
+        env:
+          SCAN_OUTCOME: ${{ steps.scan-tool.outcome }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.number }}
         run: |
-          if [ "${{ steps.scan-tool.outcome }}" == "success" ]; then
+          if [ "$SCAN_OUTCOME" == "success" ]; then
             echo "result=success" >> "$GITHUB_OUTPUT"
-            echo "✅ IAC scan passed - no security issues found"
+            echo "IAC scan passed"
           else
             echo "result=failure" >> "$GITHUB_OUTPUT"
-            echo "❌ IAC scan failed - security issues detected"
-            if [ "${{ github.event_name }}" == "pull_request" ]; then
-              echo "🔍 View findings: https://github.com/${{ github.repository }}/security/code-scanning?query=pr%3A${{ github.event.number }}+is%3Aopen"
+            echo "IAC scan failed"
+            if [ "$EVENT_NAME" == "pull_request" ]; then
+              echo "View findings: https://github.com/${REPOSITORY}/security/code-scanning?query=pr%3A${PR_NUMBER}+is%3Aopen"
             else
-              echo "🔍 View findings: https://github.com/${{ github.repository }}/security/code-scanning"
+              echo "View findings: https://github.com/${REPOSITORY}/security/code-scanning"
             fi
             exit 1
           fi
