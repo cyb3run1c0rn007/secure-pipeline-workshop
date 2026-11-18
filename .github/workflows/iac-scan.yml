@@ -35,6 +35,27 @@ jobs:
           severity: 'CRITICAL,HIGH'
         continue-on-error: false
 
+      - name: Generate Trivy JSON report
+        if: always()
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: 'config'
+          scan-ref: infra/
+          hide-progress: true
+          format: 'json'
+          output: 'trivy-results.json'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload JSON report as artifact
+        if: always() && hashFiles('trivy-results.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-json-report
+          path: trivy-results.json
+          retention-days: 7
+
+
       - name: Normalize SARIF paths to repo root
         if: always() && hashFiles('trivy-results.sarif') != ''
         # Trivy emits paths relative to scan-ref; rewrite to repo-root so GHAS can map findings to the PR diff.
